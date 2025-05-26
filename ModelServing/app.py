@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 # Load the trained model from disk
 # This assumes the .pkl file is present in the expected path
-with open("burnout_model.pkl", "rb") as f:
+with open("ModelTraining/burnout_model.pkl", "rb") as f:
     model = pickle.load(f)
 
 # Define the prediction route
