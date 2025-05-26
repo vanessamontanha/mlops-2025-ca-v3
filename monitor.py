@@ -1,34 +1,54 @@
-# monitor.py – triggers retraining if model accuracy drops
-
 import pandas as pd
 import pickle
+import os
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-import numpy as np
+from datetime import datetime
+import logging
 
-# Load synthetic drift data
-df = pd.read_csv("synthetic_drift.csv")
+# Setup logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Threshold below which retraining is triggered
+ACCURACY_THRESHOLD = 0.90
+
+# Load new data for monitoring (simulate drift)
+drift_data_path = "synthetic_drift.csv"
+if not os.path.exists(drift_data_path):
+    logging.error(f"{drift_data_path} not found. Aborting monitoring.")
+    exit(1)
+
+df = pd.read_csv(drift_data_path)
 X = df[["hours_worked", "sleep_hours", "mood_score"]]
 y = df["burnout"]
 
-# Split into test to simulate validation
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Load existing model
+# Load current model
 with open("burnout_model.pkl", "rb") as f:
     model = pickle.load(f)
 
-# Evaluate on drifted data
-accuracy = model.score(X_test, y_test)
-print(f"Drift check accuracy: {accuracy:.2f}")
+# Evaluate model accuracy on new data
+accuracy = model.score(X, y)
+logging.info(f"Model accuracy on new data: {accuracy:.2f}")
 
-# If performance drops, retrain model and overwrite .pkl
-if accuracy < 0.85:
-    print("Accuracy below threshold. Retraining...")
+# Check if accuracy is below threshold
+if accuracy < ACCURACY_THRESHOLD:
+    logging.warning("Model accuracy below threshold — data drift detected. Retraining model...")
+
+    # Retrain model
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
     new_model = LogisticRegression()
     new_model.fit(X_train, y_train)
-    with open("ModelTraining/burnout_model.pkl", "wb") as f:
+
+    # Save retrained model with versioning
+    version = datetime.now().strftime("%Y%m%d%H%M%S")
+    retrained_model_name = f"burnout_model_v{version}.pkl"
+    with open(retrained_model_name, "wb") as f:
         pickle.dump(new_model, f)
+    logging.info(f"New model retrained and saved as {retrained_model_name}")
+
+    # Update live model
+    with open("burnout_model.pkl", "wb") as f:
+        pickle.dump(new_model, f)
+    logging.info("burnout_model.pkl updated with new retrained model.")
 else:
-    print("Model is stable. No retraining needed.")
+    logging.info("Model performance is stable. No retraining needed.")
