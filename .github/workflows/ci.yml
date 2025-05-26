@@ -1,0 +1,24 @@
+# .github/workflows/ci.yml
+name: CD - Docker Build and Push
+
+on:
+  push:
+    branches:
+    - dev
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and tag Docker image
+        run: docker build -t vmontanha/burnout-api:latest .
+
+      - name: Push image to Docker Hub
+        run: docker push vmontanha/burnout-api:latest
