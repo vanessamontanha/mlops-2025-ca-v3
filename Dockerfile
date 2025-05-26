@@ -1,23 +1,23 @@
-# Use official Python 3.8 image
+# Base image
 FROM python:3.8
 
-# Set the working directory
+# Set work directory
 WORKDIR /opt/app
 
-# Copy requirements and install dependencies
+# Copy requirements and install
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy all required files
+# Copy scripts and training data
 COPY ModelServing/app.py .
 COPY ModelTraining/train_model.py .
 COPY ModelTraining/burnout_data.csv .
 
-# Train the model inside this container
+# Retrain the model inside Docker
 RUN python train_model.py
 
-# Expose the Flask port
+# Expose Flask port
 EXPOSE 5000
 
-# Run the Flask app
+# Run app
 CMD ["python", "app.py"]

@@ -1,5 +1,5 @@
 flask
 pandas
 scikit-learn
-numpy
+numpy==1.24.4
 

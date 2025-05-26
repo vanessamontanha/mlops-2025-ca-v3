@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 import pickle
 
 # Load the burnout dataset
-df = pd.read_csv("ModelTraining/burnout_data.csv")
+df = pd.read_csv("burnout_data.csv")
 
 # Separate features and target
 X = df[["hours_worked", "sleep_hours", "mood_score"]]
