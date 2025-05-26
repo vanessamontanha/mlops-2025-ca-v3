@@ -10,11 +10,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy scripts and training data
 COPY ModelServing/app.py .
-COPY ModelTraining/train_model.py .
-COPY ModelTraining/burnout_data.csv .
+COPY ModelTraining/train_model.py ModelTraining/
+COPY ModelTraining/burnout_data.csv ModelTraining/
 
 # Retrain the model inside Docker
-RUN python train_model.py
+RUN python ModelTraining/train_model.py
 
 # Expose Flask port
 EXPOSE 5000
