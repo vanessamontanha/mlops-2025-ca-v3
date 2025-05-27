@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: burnout-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: burnout
+  template:
+    metadata:
+      labels:
+        app: burnout
+    spec:
+      containers:
+        - name: burnout-container
+          image: burnout-api:v2
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
