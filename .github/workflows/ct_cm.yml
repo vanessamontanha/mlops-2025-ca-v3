@@ -1,0 +1,31 @@
+name: Continuous Monitoring and Training
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Every hour
+  workflow_dispatch:
+
+jobs:
+  monitor-and-train:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.8
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run monitoring script
+        run: python monitor.py
+
+      - name: Commit retrained model if drift is detected
+        run: |
+          if [ -f "burnout_model.pkl" ]; then
+            git config --global user.name "vanessamontanha"
+            git config --global user.email "vanessamontanha@gmail.com"
+            git add burnout_model.pkl
+            git commit -m "auto: retrain model on drift"
+            git push origin dev
+          fi
