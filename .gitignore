@@ -3,3 +3,4 @@ burnout_model_v*.pkl
 
 
 __pycache__/
+*.pkl
