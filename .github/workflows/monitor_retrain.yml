@@ -1,0 +1,46 @@
+name: CT - Monitor and Retrain Model
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # every hour
+  workflow_dispatch:     # allows manual trigger
+
+jobs:
+  monitor-and-retrain:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run monitoring script
+      run: |
+        echo "Starting monitoring..."
+        python monitor.py
+
+    - name: Check if retrained model exists
+      id: check_model
+      run: |
+        echo "MODEL_TAG=$(ls burnout_model_v*.pkl 2>/dev/null | tail -n 1 | sed 's/\.pkl//')" >> $GITHUB_OUTPUT
+
+    - name: Build and Push New Docker Image
+      if: steps.check_model.outputs.MODEL_TAG != ''
+      env:
+        DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+        DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+      run: |
+        export TAG=${{ steps.check_model.outputs.MODEL_TAG }}
+        cp $TAG.pkl burnout_model.pkl
+        docker build -t $DOCKER_HUB_USERNAME/burnout-api:$TAG .
+        echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
+        docker push $DOCKER_HUB_USERNAME/burnout-api:$TAG
