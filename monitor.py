@@ -1,3 +1,5 @@
+# monitor.py — Detects data drift and retrains model if accuracy drops below threshold
+
 import pandas as pd
 import pickle
 import os
@@ -5,9 +7,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from datetime import datetime
 import logging
+import sys
+
+# Force output to appear immediately
+sys.stdout.reconfigure(line_buffering=True)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+print("monitor.py is running...")  # Basic heartbeat check
 
 # Threshold below which retraining is triggered
 ACCURACY_THRESHOLD = 0.90
@@ -23,8 +31,12 @@ X = df[["hours_worked", "sleep_hours", "mood_score"]]
 y = df["burnout"]
 
 # Load current model
-with open("burnout_model.pkl", "rb") as f:
-    model = pickle.load(f)
+try:
+    with open("burnout_model.pkl", "rb") as f:
+        model = pickle.load(f)
+except FileNotFoundError:
+    logging.error("burnout_model.pkl not found. Cannot evaluate or retrain.")
+    exit(1)
 
 # Evaluate model accuracy on new data
 accuracy = model.score(X, y)
