@@ -2,3 +2,4 @@ model_version.txt
 burnout_model_v*.pkl
 
 
+__pycache__/
