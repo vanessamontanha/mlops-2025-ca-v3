@@ -2,33 +2,31 @@ name: CI - Run Unit Tests on PR/Push
 
 on:
   push:
-    branches: [ main, dev, feature/* ]
+    branches: [main]
   pull_request:
-    branches: [ main, dev ]
+    branches: [main]
 
 jobs:
   run-tests:
-    runs-on: self-hosted
-
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use system Python
-        run: |
-          echo "Using system Python:"
-          python3 --version
-          which python3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
 
-      - name: Set up venv and install dependencies
+      - name: Install build tools
         run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
+          python -m pip install --upgrade pip setuptools wheel build
+
+      - name: Install dependencies
+        run: |
           pip install -r requirements.txt
-          pip install pytest
 
       - name: Run unit tests
         run: |
-          source venv/bin/activate
-          pytest tests/test_pipeline.py
+          pytest tests/
+

@@ -1,5 +1,8 @@
-numpy==1.19.5
-pandas==1.1.5
-scikit-learn==0.24.2
-joblib==1.0.1
-flask
+pandas
+scikit-learn
+pytest
+nannyml
+joblib
+numpy==1.26.4
+flask==2.2.5
+werkzeug==3.0.1
