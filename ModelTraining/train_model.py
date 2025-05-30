@@ -37,7 +37,7 @@ try:
 
     print(f"[INFO] Model saved to: {model_path}")
 
-    # (Optional) Log the contents of the container/app directory for verification
+    # Log the contents of the container/app directory for verification
     print("[INFO] Contents of /opt/app after training:")
     os.system("ls -lh /opt/app")
 
