@@ -13,12 +13,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create venv and install dependencies
+      - name: Set up Python venv and install dependencies
         run: |
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
-          pip install -r requirements.txt
+          
+          PYTHON_VERSION=$(python -c "import sys; print(sys.version_info.minor)")
+          
+          if [ "$PYTHON_VERSION" -ge 8 ]; then
+            echo "Installing all dependencies including nannyml"
+            pip install -r requirements.txt
+          else
+            echo "Installing without nannyml due to old Python version"
+            grep -v 'nannyml' requirements.txt > temp-reqs.txt
+            pip install -r temp-reqs.txt
+          fi
 
       - name: Run monitoring script
         run: |
@@ -46,5 +56,6 @@ jobs:
           docker build -t $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG .
           echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
           docker push $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG
+
 
 
