@@ -1,6 +1,5 @@
 name: CI - Run Unit Tests on PR/Push
 
-
 on:
   push:
     branches: [ main, dev, feature/* ]
@@ -15,10 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
+      - name: Use system Python
+        run: |
+          echo "Using system Python:"
+          python3 --version
+          which python3
 
       - name: Install dependencies
         run: |
@@ -27,4 +27,5 @@ jobs:
           pip install pytest
 
       - name: Run unit tests
-        run: pytest tests/test_pipeline.py
+        run: |
+          pytest tests/test_pipeline.py
