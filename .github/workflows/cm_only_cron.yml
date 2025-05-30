@@ -1,6 +1,5 @@
 name: CM - Drift Check Only (Every 30min)
 
-
 on:
   schedule:
     - cron: "*/30 * * * *"  # Every 30 minutes
@@ -8,28 +7,27 @@ on:
 
 jobs:
   monitor_and_retrain:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted 
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.8'
-
-      - name: Install dependencies
+      - name: Use system Python and venv
         run: |
-          python -m pip install --upgrade pip
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run monitor.py
         run: |
+          source venv/bin/activate
           python monitor.py
 
       - name: Commit and push new model if retrained
         run: |
+          source venv/bin/activate
           if git status | grep -q "burnout_model.pkl"; then
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
