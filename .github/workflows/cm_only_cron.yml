@@ -13,18 +13,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install dependencies system-wide
+      - name: Set up Python 3.8 venv and install dependencies
         run: |
-          pip3 install --upgrade pip
-          pip3 install -r requirements.txt
+          python3.8 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run monitoring script
         run: |
-          python3 monitor.py
+          source venv/bin/activate
+          python monitor.py
 
-      - name: Check if retrained model exists and prepare safe Docker tag
+      - name: Check if retrained model exists and prepare Docker tag
         run: |
           FILE=$(ls burnout_model_v*.pkl 2>/dev/null | tail -n 1)
+          if [[ -z "$FILE" ]]; then
+            echo "No model retrained. Exiting early."
+            exit 0
+          fi
           TAG=$(basename "$FILE" .pkl | sed 's/[^a-zA-Z0-9_.-]/-/g')
           echo "MODEL_FILE=$FILE" >> $GITHUB_ENV
           echo "MODEL_TAG=$TAG" >> $GITHUB_ENV
@@ -39,3 +46,4 @@ jobs:
           docker build -t $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG .
           echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
           docker push $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG
+
