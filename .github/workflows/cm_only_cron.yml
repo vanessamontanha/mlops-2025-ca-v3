@@ -1,4 +1,4 @@
-name: CM + CT - Daily Drift Check, Retrain, and Docker Push
+name: CM + CT - Daily Drift Check, Retrain and Docker Push
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   monitor-and-retrain:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest  # switched from self-hosted to GitHub Actions runner
 
     steps:
       - name: Checkout repository
@@ -16,12 +16,14 @@ jobs:
       - name: Set up venv and install dependencies
         run: |
           python3 -m venv venv
-          venv/bin/pip install --upgrade pip
-          venv/bin/pip install -r requirements.txt
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run monitoring script
         run: |
-          venv/bin/python monitor.py
+          source venv/bin/activate
+          python monitor.py
 
       - name: Check if retrained model exists
         run: |
