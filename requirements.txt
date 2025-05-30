@@ -1,8 +1,5 @@
+numpy
 pandas
 scikit-learn
-pytest
-nannyml
 joblib
-numpy==1.26.4
-flask==2.2.5
-werkzeug==3.0.1
+flask
