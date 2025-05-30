@@ -7,32 +7,28 @@ on:
 
 jobs:
   monitor-and-train:
-    runs-on: self-hosted  
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python and venv
+      - name: Set up venv and install dependencies
         run: |
           python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          venv/bin/pip install --upgrade pip
+          venv/bin/pip install -r requirements.txt
 
       - name: Run monitoring script
-        run: |
-          source venv/bin/activate
-          python monitor.py
+        run: venv/bin/python monitor.py
 
       - name: Commit retrained model if drift is detected
         run: |
-          source venv/bin/activate
-          if git status | grep -q "burnout_model.pkl"; then
-            git config user.name "vanessamontanha"
-            git config user.email "vanessamontanha@gmail.com"
+          if [ -f "burnout_model.pkl" ]; then
+            git config --global user.name "vanessamontanha"
+            git config --global user.email "vanessamontanha@gmail.com"
             git add burnout_model.pkl burnout_model_v*.pkl
             git commit -m "auto: retrain model on drift"
             git push origin dev
           else
-            echo "No retraining occurred. Skipping commit."
+            echo "No retrained model generated — no commit needed."

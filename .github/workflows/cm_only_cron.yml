@@ -7,24 +7,23 @@ on:
 
 jobs:
   monitor_and_retrain:
-    runs-on: self-hosted 
+    runs-on: self-hosted
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Use system Python and venv
+      - name: Set up venv and install dependencies
         run: |
           python3 -m venv venv
-          source venv/bin/activate && pip install --upgrade pip
-          source venv/bin/activate && pip install -r requirements.txt
+          venv/bin/pip install --upgrade pip
+          venv/bin/pip install -r requirements.txt
 
       - name: Run monitor.py
-        run: source venv/bin/activate && python monitor.py
+        run: venv/bin/python monitor.py
 
       - name: Commit and push new model if retrained
         run: |
-          source venv/bin/activate && \
           if git status | grep -q "burnout_model.pkl"; then
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
@@ -33,3 +32,4 @@ jobs:
             git push origin dev
           else
             echo "No retraining needed. No files changed."
+
