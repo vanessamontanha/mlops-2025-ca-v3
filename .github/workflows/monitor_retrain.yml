@@ -31,15 +31,17 @@ jobs:
     - name: Check if retrained model exists
       id: check_model
       run: |
-        echo "MODEL_TAG=$(ls burnout_model_v*.pkl 2>/dev/null | tail -n 1 | sed 's/\.pkl//')" >> $GITHUB_OUTPUT
+        echo "Checking for retrained model..."
+        MODEL_TAG=$(ls burnout_model_v*.pkl 2>/dev/null | tail -n 1 | sed 's/\.pkl//')
+        echo "model_tag=$MODEL_TAG" >> $GITHUB_OUTPUT
 
     - name: Build and Push New Docker Image
-      if: steps.check_model.outputs.MODEL_TAG != ''
+      if: steps.check_model.outputs.model_tag != ''
       env:
         DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
         DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
       run: |
-        export TAG=${{ steps.check_model.outputs.MODEL_TAG }}
+        export TAG=${{ steps.check_model.outputs.model_tag }}
         cp $TAG.pkl burnout_model.pkl
         docker build -t $DOCKER_HUB_USERNAME/burnout-api:$TAG .
         echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
