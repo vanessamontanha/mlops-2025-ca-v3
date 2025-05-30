@@ -30,7 +30,7 @@ def test_model_accuracy_threshold():
 
 # Test 3: Ensure model file is saved
 def test_model_file_saved():
-    model_path = "ModelTraining/burnout_model.pkl"
+    model_path = "burnout_model.pkl"
     if not os.path.exists(model_path):
         import ModelTraining.train_model as tm
         tm.main()  # Call the wrapper to train and save model
