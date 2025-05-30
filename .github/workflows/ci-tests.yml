@@ -1,4 +1,5 @@
-name: CI - Unit Tests
+name: CI - Run Unit Tests on PR/Push
+
 
 on:
   push:
