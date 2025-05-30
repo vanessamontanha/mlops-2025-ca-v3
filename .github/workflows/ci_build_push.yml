@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: self-hosted  # or change to ubuntu-latest if not using your own VM
+    runs-on: self-hosted  
 
     steps:
       - name: Checkout repository
