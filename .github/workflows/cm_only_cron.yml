@@ -18,9 +18,8 @@ jobs:
           python3 -m venv venv
           source venv/bin/activate
           pip install --upgrade pip
-          
+
           PYTHON_VERSION=$(python -c "import sys; print(sys.version_info.minor)")
-          
           if [ "$PYTHON_VERSION" -ge 8 ]; then
             echo "Installing all dependencies including nannyml"
             pip install -r requirements.txt
@@ -30,7 +29,7 @@ jobs:
             pip install -r temp-reqs.txt
           fi
 
-      - name: Run monitoring script
+      - name: Run monitoring script (inside virtual environment)
         run: |
           source venv/bin/activate
           python monitor.py
