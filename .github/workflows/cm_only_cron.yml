@@ -13,19 +13,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Create venv using Python 3.8 and install dependencies
+      - name: Set up virtual environment and install dependencies
         run: |
           python3.8 -m venv venv
-          source venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          venv/bin/pip install --upgrade pip
+          venv/bin/pip install -r requirements.txt
 
       - name: Run monitoring script
         run: |
-          source venv/bin/activate
-          python monitor.py
+          venv/bin/python monitor.py
 
-      - name: Check if retrained model exists
+      - name: Check if retrained model exists and set tag
         run: |
           TAG=$(ls burnout_model_v*.pkl 2>/dev/null | tail -n 1 | sed 's/\.pkl//')
           echo "MODEL_TAG=$TAG" >> $GITHUB_ENV
@@ -40,6 +38,7 @@ jobs:
           docker build -t $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG .
           echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
           docker push $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG
+
 
 
 
