@@ -13,26 +13,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Python venv and install dependencies
+      - name: Install dependencies system-wide
         run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
+          python3 -m pip install --upgrade pip
+          pip install --user numpy pandas scikit-learn joblib matplotlib pytest
 
-          PYTHON_VERSION=$(python -c "import sys; print(sys.version_info.minor)")
-          if [ "$PYTHON_VERSION" -ge 8 ]; then
-            echo "Installing all dependencies including nannyml"
-            pip install -r requirements.txt
+          # Attempt nannyml install only if Python >= 3.9
+          PY_VER=$(python3 -c 'import sys; print(sys.version_info.minor)')
+          if [ "$PY_VER" -ge 9 ]; then
+            pip install --user nannyml
           else
-            echo "Installing without nannyml due to old Python version"
-            grep -v 'nannyml' requirements.txt > temp-reqs.txt
-            pip install -r temp-reqs.txt
+            echo "Skipping nannyml install — requires Python >= 3.9"
           fi
 
-      - name: Run monitoring script (inside virtual environment)
+      - name: Run monitoring script
         run: |
-          source venv/bin/activate
-          python monitor.py
+          python3 monitor.py
 
       - name: Check if retrained model exists and prepare Docker tag
         run: |
@@ -55,6 +51,5 @@ jobs:
           docker build -t $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG .
           echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
           docker push $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG
-
 
 
