@@ -5,6 +5,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 import datetime
 import sys
+import numpy as np 
+
 
 
 # Compatibility guard for older Python versions (like 3.6)
