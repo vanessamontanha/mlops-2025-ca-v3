@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: burnout-service
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: burnout
   ports:

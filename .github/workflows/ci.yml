@@ -1,24 +1,36 @@
-# .github/workflows/ci.yml
-name: CD - Docker Build and Push
+name: CI - Build and Push Docker Image
 
 on:
   push:
-    branches:
-    - dev
+    branches: [main, dev]
+  workflow_dispatch:
 
 jobs:
-  docker:
-    runs-on: ubuntu-latest
+  build-and-push:
+    runs-on: self-hosted  # or change to ubuntu-latest if not using your own VM
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show current directory
+        run: pwd
+
+      - name: List all files (debugging)
+        run: ls -R
+
+      - name: Check Docker installation
+        run: docker version
 
       - name: Log in to Docker Hub
-        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      - name: Build and tag Docker image
-        run: docker build -t vmontanha/burnout-api:latest .
+      - name: Build Docker image with no cache and full logs
+        run: docker build --no-cache --progress=plain -t vmontanha/burnout-api:v3 .
+
+      - name: List Docker images (sanity check)
+        run: docker images
 
       - name: Push image to Docker Hub
-        run: docker push vmontanha/burnout-api:latest
+        run: docker push vmontanha/burnout-api:v3
+
