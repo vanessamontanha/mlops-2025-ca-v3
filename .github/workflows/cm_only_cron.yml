@@ -13,23 +13,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'  # Ensures compatible Python version
+
       - name: Set up venv and install dependencies
         run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install numpy  # Let pip choose compatible version
+          python -m venv venv
+          venv/bin/pip install --upgrade pip
+          venv/bin/pip install numpy==1.24.4 pandas scikit-learn joblib pytest
 
       - name: Run monitoring script
         run: |
-          source venv/bin/activate
-          python monitor.py
+          venv/bin/python monitor.py
 
       - name: Check if retrained model exists and prepare safe Docker tag
         run: |
-          TAG=$(ls burnout_model_v*.pkl 2>/dev/null | tail -n 1 | sed 's/\.pkl//' | sed 's/[^a-zA-Z0-9_.-]//g')
-          echo "MODEL_TAG=$TAG" >> $GITHUB_ENV
+          RAW_TAG=$(ls burnout_model_v*.pkl 2>/dev/null | tail -n 1 | sed 's/\.pkl//')
+          SAFE_TAG=$(echo "$RAW_TAG" | sed 's/_/-/g' | tr '[:upper:]' '[:lower:]')
+          echo "MODEL_TAG=$SAFE_TAG" >> $GITHUB_ENV
+          echo "RAW_TAG=$RAW_TAG" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image (if model retrained)
         if: env.MODEL_TAG != ''
@@ -37,7 +41,7 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
         run: |
-          cp burnout_model_${{ env.MODEL_TAG }}.pkl burnout_model.pkl
-          docker build -t $DOCKER_HUB_USERNAME/burnout-api:${{ env.MODEL_TAG }} .
-          echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
-          docker push $DOCKER_HUB_USERNAME/burnout-api:${{ env.MODEL_TAG }}
+          cp "$RAW_TAG.pkl" burnout_model.pkl
+          docker build -t "$DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG" .
+          echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USERNAME" --password-stdin
+          docker push "$DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG"
