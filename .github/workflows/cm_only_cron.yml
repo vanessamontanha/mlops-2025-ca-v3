@@ -2,7 +2,7 @@ name: CM - Drift Check Only (Every 30min)
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Every 30 minutes
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -13,23 +13,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up venv and install dependencies
+      - name: Set up virtual environment
         run: |
           python3 -m venv venv
-          venv/bin/pip install --upgrade pip
-          venv/bin/pip install -r requirements.txt
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
       - name: Run monitor.py
-        run: venv/bin/python monitor.py
+        run: |
+          source venv/bin/activate
+          python monitor.py
 
       - name: Commit and push new model if retrained
         run: |
-          if git status | grep -q "burnout_model.pkl"; then
+          source venv/bin/activate
+          if git status | grep -q "burnout_model"; then
             git config user.name "github-actions"
             git config user.email "github-actions@github.com"
-            git add burnout_model.pkl burnout_model_v*.pkl
+            git add burnout_model*.pkl
             git commit -m "chore: retrained model pushed by cron job"
             git push origin dev
           else
-            echo "No retraining needed. No files changed."
+            echo "No retraining needed."
+
 
