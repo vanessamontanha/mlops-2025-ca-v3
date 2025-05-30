@@ -20,12 +20,15 @@ jobs:
           python3 --version
           which python3
 
-      - name: Install dependencies
+      - name: Set up venv and install dependencies
         run: |
-          python3 -m pip install --upgrade pip
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
 
       - name: Run unit tests
         run: |
+          source venv/bin/activate
           pytest tests/test_pipeline.py
