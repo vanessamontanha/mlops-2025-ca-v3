@@ -16,14 +16,12 @@ jobs:
       - name: Set up venv and install dependencies
         run: |
           python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-          pip install -r requirements.txt
+          venv/bin/pip install --upgrade pip
+          venv/bin/pip install -r requirements.txt
 
       - name: Run monitoring script
         run: |
-          source venv/bin/activate
-          python monitor.py
+          venv/bin/python monitor.py
 
       - name: Check if retrained model exists
         run: |

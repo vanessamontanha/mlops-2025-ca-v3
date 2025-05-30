@@ -30,3 +30,4 @@ jobs:
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "vmontanha" --password-stdin
           docker push vmontanha/burnout-api:latest
+
