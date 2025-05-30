@@ -8,6 +8,8 @@ from sklearn.model_selection import train_test_split
 from datetime import datetime
 import logging
 import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
 
 # Force output to appear immediately
 sys.stdout.reconfigure(line_buffering=True)

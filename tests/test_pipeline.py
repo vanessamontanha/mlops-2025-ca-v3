@@ -28,7 +28,11 @@ def test_model_accuracy_threshold():
 # Test 3: Model file is saved after training
 def test_model_file_saved():
     model_path = "ModelTraining/burnout_model.pkl"
+    if not os.path.exists(model_path):
+        import ModelTraining.train_model as tm
+        tm.main()
     assert os.path.exists(model_path), f"Model file not found at {model_path}"
+
 
 # Test 4: Drifted data triggers retraining and creates a new versioned model file
 def test_monitor_triggers_retraining():
