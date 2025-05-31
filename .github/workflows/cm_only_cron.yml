@@ -13,12 +13,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Build and run monitoring script in Docker
+      - name: Build Docker Image for Monitoring
         run: |
-          docker build -f Dockerfile.ctcm -t vmontanha/burnout-monitor:latest .
-          docker run --rm -v ${{ github.workspace }}:/app vmontanha/burnout-monitor:latest
+          docker build -t burnout-monitor:latest .
 
-      - name: Check if retrained model exists and set tag
+      - name: Run Monitoring Script
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/opt/app burnout-monitor:latest python monitor.py
+
+      - name: Set Model Tag from Retrain Output
         run: |
           TAG=$(ls burnout_model_v*.pkl 2>/dev/null | tail -n 1 | sed 's/\.pkl//')
           echo "MODEL_TAG=$TAG" >> $GITHUB_ENV
@@ -31,11 +34,6 @@ jobs:
         run: |
           cp $MODEL_TAG.pkl burnout_model.pkl
           docker build -t $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG .
-          docker tag $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG $DOCKER_HUB_USERNAME/burnout-api:latest
           echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
           docker push $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG
-          docker push $DOCKER_HUB_USERNAME/burnout-api:latest
-
-
-
 
