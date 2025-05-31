@@ -15,8 +15,8 @@ jobs:
 
       - name: Build and run monitoring script in Docker
         run: |
-          docker build -f Dockerfile.ctcm -t burnout-monitor:latest .
-          docker run --rm -v ${{ github.workspace }}:/app burnout-monitor:latest
+          docker build -f Dockerfile.ctcm -t vmontanha/burnout-monitor:latest .
+          docker run --rm -v ${{ github.workspace }}:/app vmontanha/burnout-monitor:latest
 
       - name: Check if retrained model exists and set tag
         run: |
@@ -31,8 +31,11 @@ jobs:
         run: |
           cp $MODEL_TAG.pkl burnout_model.pkl
           docker build -t $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG .
+          docker tag $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG $DOCKER_HUB_USERNAME/burnout-api:latest
           echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
           docker push $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG
+          docker push $DOCKER_HUB_USERNAME/burnout-api:latest
+
 
 
 
