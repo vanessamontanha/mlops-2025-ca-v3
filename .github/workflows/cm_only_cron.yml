@@ -13,15 +13,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up virtual environment and install dependencies
+      - name: Build and run monitoring script in Docker
         run: |
-          python3.8 -m venv venv
-          venv/bin/pip install --upgrade pip
-          venv/bin/pip install -r requirements.txt
-
-      - name: Run monitoring script
-        run: |
-          venv/bin/python monitor.py
+          docker build -f Dockerfile.ctcm -t burnout-monitor:latest .
+          docker run --rm -v ${{ github.workspace }}:/app burnout-monitor:latest
 
       - name: Check if retrained model exists and set tag
         run: |
@@ -38,7 +33,6 @@ jobs:
           docker build -t $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG .
           echo $DOCKER_HUB_TOKEN | docker login -u $DOCKER_HUB_USERNAME --password-stdin
           docker push $DOCKER_HUB_USERNAME/burnout-api:$MODEL_TAG
-
 
 
 

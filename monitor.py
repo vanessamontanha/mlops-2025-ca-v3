@@ -5,9 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 import datetime
 import sys
-import numpy as np 
-
-
+import numpy as np
 
 # Compatibility guard for older Python versions (like 3.6)
 if hasattr(sys.stdout, "reconfigure"):
@@ -46,29 +44,24 @@ def save_versioned_model(model):
 
 # Main function logic: monitor, detect drift, retrain if needed
 def main():
-    try:
-        # Load new data to check for drift
-        df = pd.read_csv("synthetic_drift.csv")
-        X_drift = df[["hours_worked", "sleep_hours", "mood_score"]]
-        y_drift = df["burnout"]
+    # Load new data to check for drift
+    df = pd.read_csv("synthetic_drift.csv")
+    X_drift = df[["hours_worked", "sleep_hours", "mood_score"]]
+    y_drift = df["burnout"]
 
-        # Load latest model
-        model = load_latest_model()
-        if model is None:
-            print("[WARNING] No existing model found. Skipping drift check.")
-            return
+    # Load latest model
+    model = load_latest_model()
+    if model is None:
+        print("[WARNING] No existing model found. Skipping drift check.")
+        return
 
-        # Check for drift and retrain if needed
-        if detect_drift(model, X_drift, y_drift):
-            print("[INFO] Drift detected. Retraining model...")
-            model = retrain_model(X_drift, y_drift)
-            save_versioned_model(model)
-        else:
-            print("[INFO] No drift detected. Model is still valid.")
-
-    except Exception as e:
-        print(f"[ERROR] {e}", file=sys.stderr)
-        sys.exit(1)
+    # Check for drift and retrain if needed
+    if detect_drift(model, X_drift, y_drift):
+        print("[INFO] Drift detected. Retraining model...")
+        model = retrain_model(X_drift, y_drift)
+        save_versioned_model(model)
+    else:
+        print("[INFO] No drift detected. Model is still valid.")
 
 # Entry point
 if __name__ == "__main__":
